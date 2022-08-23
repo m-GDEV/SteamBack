@@ -1,7 +1,19 @@
+import { Routes, Route } from "react-router-dom";
+
+import Navbar from "./components/Navbar";
+import Login from "./components/Login";
+import Dashboard from "./components/Dashboard";
+
 export default function App() {
-    return(
-        <>
-            <h1 className="text-red-500">Hello</h1>
-        </>
-    )
+    return (
+        <div className="bg-slate-900 min-h-screen font-mono">
+            <Navbar />
+            <div className="flex justify-center mt-24">
+                <Routes>
+                    <Route path="/" element={<Login />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                </Routes>
+            </div>
+        </div>
+    );
 }
