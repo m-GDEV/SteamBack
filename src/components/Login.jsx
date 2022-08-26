@@ -1,38 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
     const [steamID, setSteamID] = useState("");
     const [ready, setReady] = useState(false);
     const [valid, setValid] = useState(false);
+    const navigate = useNavigate();
 
     let message = !valid && ready ? "SteamID Invalid" : "";
-    let url = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=9B7D9DC372569E211AEF25A943E65105&steamid=${steamID}`;
-
-    useEffect(() => {
-        document.title = "SteamBack - easily view your steam backlog";
-    }, []);
 
     function checkSteamID(steamID) {
-        fetch(url, { mode: "no-cors" })
-            .then((response) => {
-                console.log(url);
-                console.log(response);
-            })
-            .then((response) => {
-                if (!response.ok) {
-                    setValid(false);
-                    setReady(true);
-                    console.log(response);
-                    console.log(response.ok);
-                    console.log(response.status);
-                } else if (response.ok) {
-                    setReady(true);
-                    console.log("working");
-
-                    navigate(`/dashboard?steamID=${steamID}`);
-                }
-            });
+        let url = `https://us-central1-steamback-f4d3f.cloudfunctions.net/userGames?steamID=${steamID}`;
+        fetch(url).then((response) => {
+            if (response.ok) {
+                navigate(`/dashboard?steamID=${steamID}`);
+            } else {
+                setReady(true);
+            }
+        });
     }
 
     return (
