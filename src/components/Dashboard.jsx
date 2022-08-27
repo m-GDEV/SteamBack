@@ -1,11 +1,8 @@
 import { useState, useEffect } from "react";
+import Profile from "./Profile";
 import {
-    CheckCircleIcon,
-    XCircleIcon,
-    ClockIcon,
-    EyeIcon,
-    EyeSlashIcon,
-    CalendarIcon,
+    BarsArrowUpIcon,
+    BarsArrowDownIcon,
 } from "@heroicons/react/24/outline";
 
 export default function Dashboard() {
@@ -14,42 +11,17 @@ export default function Dashboard() {
     const gamesUrl = `https://us-central1-steamback-f4d3f.cloudfunctions.net/userGames?steamID=${steamID}`;
 
     const [games, setGames] = useState([]); // base unchaged data from server
-    const [playtimeSorted, setPlaytimeSorted] = useState([]); // array that sorts games array by playtime
-    const [alphaSorted, setAlphaSorted] = useState([]); // array that sorts games array by alphabectical order
     const [unplayed, setUnplayed] = useState([]);
     const [profile, setProfile] = useState([]); // array that contains user info
     const [loading, setLoading] = useState(true);
+    const [sortDirection, setSortDirection] = useState(true); // true is A-Z false is Z-A
 
-    const onlineState = [
-        "Offline",
-        "Online",
-        "Busy",
-        "Away",
-        "Snooze",
-        "Looking to Trade",
-        "Looking to Play",
-    ];
-    const onlineIcons = [
-        <XCircleIcon className="h-7 text-red-500" />,
-        <CheckCircleIcon className="h-7 text-green-500" />,
-        <ClockIcon className="h-7 text-yellow-500" />,
-        <CalendarIcon className="h-7 text-yellow-500" />,
-        <ClockIcon className="h-7 text-yellow-500" />,
-    ];
-
-    // two functions to reverse the order of each array
-    const playtimeRev = () => {
-        setPlaytimeSorted([...playtimeSorted].reverse());
-        console.log(playtimeSorted[0].name);
-    };
-
+    // function to reverse the order of array
     const alphaRev = () => {
-        setAlphaSorted([...alphaSorted].reverse());
-        console.log(alphaSorted[0].name);
-    };
-
-    const unixToDate = (timestamp) => {
-        return new Date(timestamp * 1000).toLocaleString("en-US");
+        setUnplayed([...unplayed].reverse());
+        console.log(unplayed[0].name);
+        setSortDirection(!sortDirection);
+        console.log(sortDirection);
     };
 
     // on page load, fetch all information from cloud function
@@ -75,12 +47,17 @@ export default function Dashboard() {
     // special useEffect that runs only when the games state array is changed
     // this only happends once after its state is set
     useEffect(() => {
-        // most playtime at bottom
-        let playtimeSort = [...games].sort(
-            (a, b) => a.playtime_forever - b.playtime_forever
-        );
+        let sorted = [];
 
-        let alphaSort = [...games].sort((a, b) => {
+        for (let i = 0; i < games.length; i++) {
+            let game = games[i];
+
+            if (game.playtime_forever <= 60) {
+                sorted.push(game);
+            }
+        }
+
+        let alphaSort = [...sorted].sort((a, b) => {
             const nameA = a.name.toUpperCase();
             const nameB = b.name.toUpperCase();
 
@@ -89,20 +66,8 @@ export default function Dashboard() {
             return 0;
         });
 
-        setPlaytimeSorted(playtimeSort);
-        setAlphaSorted(alphaSort);
+        setUnplayed(alphaSort);
     }, [games]);
-
-    useEffect(() => {
-        for (let i = 0; i < games.length; i++) {
-            let game = playtimeSorted[i];
-            let playtime = game.playtime_forever / 60;
-
-            if (playtime == 0) {
-                setUnplayed((unplayed) => [...unplayed, game]);
-            }
-        }
-    }, [playtimeSorted]);
 
     if (loading) {
         return (
@@ -113,75 +78,54 @@ export default function Dashboard() {
     }
 
     return (
-        <div className="text-white mb-12">
-            <div className="mb-4 text-center">
-                <p className="text-4xl">
-                    Welcome
-                    <a className="text-blue-700 ml-2" href={profile.profileurl}>
-                        {profile.personaname}
-                    </a>
+        <div className="text-white mb-12 flex flex-col justify-center place-items-center">
+            <Profile data={profile} />
+            <div className="mx-4 text-center">
+                <p className="font-medium text-xl lg:text-2xl mx-4 mb-2">
+                    Below you will find all of your (paid) games that you have
+                    not played
+                </p>
+                <p className="text-base sm:text-lg text-gray-700 mb-8 lg:mb-12">
+                    * Games are considered unplayed if the user has played less
+                    than 60 minutes.
                 </p>
             </div>
-            <div className="flex flex-row gap-8 mb-10 items-end">
-                <div className="flex flex-col justify-center gap-2">
-                    <img
-                        src={profile.avatarfull}
-                        className="h-40 rounded-2xl"
-                    />
-                    <p className="bg-slate-800 py-2 px-3 rounded text-sm">
-                        {profile.steamid}
-                    </p>
-                </div>
-                <div className="flex flex-col gap-2 text-center">
-                    <div className="flex flex-row justify-around">
-                        <div>
-                            {profile.communityvisibilitystate == 3 && (
-                                <div className="flex items-center gap-2">
-                                    <EyeIcon className="h-7 text-green-500" />
-                                    <p>Public</p>
-                                </div>
-                            )}
-                            {profile.communityvisibilitystate == 1 && (
-                                <div className="flex items-center gap-2">
-                                    <EyeSlashIcon className="h-7 text-red-500" />
-                                    <p>Private</p>
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            {onlineIcons[profile.personastate]}
-                            {onlineState[profile.personastate]}
-                        </div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <p className="bg-slate-800 py-2 px-3 rounded">
-                            {profile.accountname}
-                        </p>
-                        <p className="bg-slate-800 py-2 px-3 rounded">
-                            {profile.realname}
-                        </p>
-                    </div>
-                    <div className="font-bold">
-                        <p className="mt-2 flex flex-row justify-between items-center gap-4 text-indigo-500">
-                            Last Online:
-                            <nobr className="bg-slate-800 px-3 py-2 rounded text-yellow-500">
-                                {unixToDate(profile.lastlogoff)}
-                            </nobr>
-                        </p>
-                        <p className="mt-2 flex flex-row justify-between items-center gap-4 text-violet-500">
-                            Account Created:
-                            <nobr className="bg-slate-800 px-3 py-2 rounded text-yellow-500">
-                                {unixToDate(profile.timecreated)}
-                            </nobr>
-                        </p>
-                    </div>
-                </div>
+            <button
+                className="flex gap-2 items-center bg-pink-600 border-4 border-pink-500 px-2 py-1.5 rounded-xl mb-6"
+                onClick={alphaRev}
+            >
+                {sortDirection == false && <BarsArrowUpIcon className="h-6" />}
+                {sortDirection == true && <BarsArrowDownIcon className="h-6" />}
+                Sort Alphabetically
+            </button>
+
+            <div className="flex flex-wrap justify-center transition-all duration-300 gap-6 mx-4">
+                {unplayed.map((game) => {
+                    const image = `https://cdn.cloudflare.steamstatic.com/steam/apps/${game.appid}/header.jpg`;
+
+                    return (
+                        <a
+                            href={`https://store.steampowered.com/app/${game.appid}`}
+                            target="__blank"
+                            className="bg-indigo-900 rounded px-8 py-3 drop-shadow-xl hover:scale-105 transition-all duration-300"
+                            key={game.appid}
+                        >
+                            <p className="font-bold text-lg lg:text-2xl text-pink-500 underline">
+                                {game.name}
+                            </p>
+                            <p className="px-2 py-1 bg-gray-700 w-fit rounded text-sm mt-3 mb-2">
+                                {game.appid}
+                            </p>
+                            <img
+                                src={image}
+                                alt="Image not found"
+                                className="h-24 mt-1 rounded"
+                                loading="lazy"
+                            />
+                        </a>
+                    );
+                })}
             </div>
-            <button onClick={playtimeRev}>Click!</button>
-            <button onClick={alphaRev}>Click!</button>
-            {unplayed.map((game) => {
-                return <div>{game.name}</div>;
-            })}
         </div>
     );
 }
