@@ -1,6 +1,9 @@
 # SteamBack
 A simple backlog viewer for your steam games.
 
+
+![Image of demo](./public/demo.png)
+
 [finish this]
 
 potential enhancements:
