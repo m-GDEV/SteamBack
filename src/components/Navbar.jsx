@@ -16,9 +16,20 @@ export default function Navbar() {
                         SteamBack
                     </h1>
                 </Link>
-                <p className="hidden sm:block px-3 py-2 bg-slate-800 hover:bg-slate-700 transition-all duration-300 rounded-xl text-[#2efb1c]">
-                    easily view your steam backlog
-                </p>
+                <div className="flex flex-row gap-2 text-sm lg:text-lg">
+                    <p className="hidden md:block px-3 py-2 bg-slate-800 hover:bg-slate-700 transition-all duration-300 rounded-xl text-[#2efb1c]">
+                        easily view your steam backlog
+                    </p>
+                    <button
+                        className="hidden md:block px-3 py-2 bg-slate-800 hover:bg-slate-700 transition-all duration-300 rounded-xl text-[#ff0000] font-bold"
+                        onClick={() => {
+                            document.getElementById("app").style.fontFamily =
+                                "Helvetica, sans-serif";
+                        }}
+                    >
+                        i hate this font
+                    </button>
+                </div>
             </header>
             <hr className="bg-white h-1" />
         </>

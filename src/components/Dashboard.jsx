@@ -15,13 +15,97 @@ export default function Dashboard() {
     const [profile, setProfile] = useState([]); // array that contains user info
     const [loading, setLoading] = useState(true);
     const [sortDirection, setSortDirection] = useState(true); // true is A-Z false is Z-A
+    // Types = 0: alpha, 1: playtime, 2: last played
+    const [sortType, setSortType] = useState(0);
 
-    // function to reverse the order of array
-    const alphaRev = () => {
-        setUnplayed([...unplayed].reverse());
-        console.log(unplayed[0].name);
-        setSortDirection(!sortDirection);
-        console.log(sortDirection);
+    // Below i have 3 sorting functions that update the "unplayed" state variable
+    // If the current sort type is already what is requestd the functions
+    // will simply reverse the current array. For eg if the array is already sorted
+    // by playtime and the user clicks the button it assumes they want to sort
+    // it in the opposite direction
+
+    const alphaSort = () => {
+        if (sortType == 0) {
+            setUnplayed([...unplayed].reverse());
+            setSortDirection(!sortDirection);
+        } else {
+            setUnplayed(
+                [...unplayed].sort((a, b) =>
+                    a.name.toUpperCase().localeCompare(b.name.toUpperCase())
+                )
+            );
+            setSortType(0);
+            setSortDirection(!sortDirection);
+        }
+    };
+
+    const playtimeSort = () => {
+        if (sortType == 1) {
+            setUnplayed([...unplayed].reverse());
+            setSortDirection(!sortDirection);
+        } else {
+            setUnplayed(
+                [...unplayed].sort((game1, game2) => {
+                    // Sorts by game with most playtime
+                    return game2.playtime_forever - game1.playtime_forever;
+                })
+            );
+            setSortType(1);
+            setSortDirection(!sortDirection);
+        }
+    };
+
+    const lastPlayedSort = () => {
+        if (sortType == 2) {
+            setUnplayed([...unplayed].reverse());
+            setSortDirection(!sortDirection);
+        } else {
+            setUnplayed(
+                [...unplayed].sort((game1, game2) => {
+                    // Sorts by game played most recently
+                    return game2.rtime_last_played - game1.rtime_last_played;
+                })
+            );
+            setSortType(2);
+            setSortDirection(!sortDirection);
+        }
+    };
+
+    // Got this from Mozilla's AI thing on their website
+    const formatUnixTimestamp = (unixTimestamp) => {
+        if (unixTimestamp == 0) {
+            return "N/A";
+        }
+
+        // Create a new Date object from the UNIX timestamp
+        const date = new Date(unixTimestamp * 1000);
+
+        // Format the date components
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const ampm = hours >= 12 ? "PM" : "AM";
+        const formattedHours = hours % 12 || 12; // Convert 24-hour time to 12-hour format
+        const formattedMinutes = minutes < 10 ? "0" + minutes : minutes;
+        const day = date.getDate();
+        const monthNames = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+        ];
+        const month = monthNames[date.getMonth()];
+        const year = date.getFullYear();
+
+        // Construct the formatted string
+        return `${formattedHours}:${formattedMinutes} ${ampm} - ${month} ${day}, ${year}`;
     };
 
     // on page load, fetch all information from cloud function
@@ -57,14 +141,9 @@ export default function Dashboard() {
             }
         }
 
-        let alphaSort = [...sorted].sort((a, b) => {
-            const nameA = a.name.toUpperCase();
-            const nameB = b.name.toUpperCase();
-
-            if (nameA < nameB) return -1;
-            if (nameA > nameB) return 1;
-            return 0;
-        });
+        let alphaSort = [...sorted].sort((a, b) =>
+            a.name.toUpperCase().localeCompare(b.name.toUpperCase())
+        );
 
         setUnplayed(alphaSort);
     }, [games]);
@@ -90,14 +169,44 @@ export default function Dashboard() {
                     than 60 minutes.
                 </p>
             </div>
-            <button
-                className="flex gap-2 items-center bg-pink-600 border-4 border-pink-500 px-2 py-1.5 rounded-xl mb-6"
-                onClick={alphaRev}
-            >
-                {sortDirection == false && <BarsArrowUpIcon className="h-6" />}
-                {sortDirection == true && <BarsArrowDownIcon className="h-6" />}
-                Sort Alphabetically
-            </button>
+            <div className="flex flex-row gap-4">
+                <button
+                    className="flex gap-2 items-center bg-pink-600 border-4 border-pink-500 px-2 py-1.5 rounded-xl mb-6 hover:bg-indigo-900 hover:border-pink-600 transition-all duration-300"
+                    onClick={alphaSort}
+                >
+                    {sortDirection == false && (
+                        <BarsArrowUpIcon className="h-6" />
+                    )}
+                    {sortDirection == true && (
+                        <BarsArrowDownIcon className="h-6" />
+                    )}
+                    Sort Alphabetically
+                </button>
+                <button
+                    className="flex gap-2 items-center bg-pink-600 border-4 border-pink-500 px-2 py-1.5 rounded-xl mb-6 hover:bg-indigo-900 hover:border-pink-600 transition-all duration-300"
+                    onClick={playtimeSort}
+                >
+                    {sortDirection == false && (
+                        <BarsArrowUpIcon className="h-6" />
+                    )}
+                    {sortDirection == true && (
+                        <BarsArrowDownIcon className="h-6" />
+                    )}
+                    Sort By Playtime
+                </button>
+                <button
+                    className="flex gap-2 items-center bg-pink-600 border-4 border-pink-500 px-2 py-1.5 rounded-xl mb-6 hover:bg-indigo-900 hover:border-pink-600 transition-all duration-300"
+                    onClick={lastPlayedSort}
+                >
+                    {sortDirection == false && (
+                        <BarsArrowUpIcon className="h-6" />
+                    )}
+                    {sortDirection == true && (
+                        <BarsArrowDownIcon className="h-6" />
+                    )}
+                    Sort By Last Played
+                </button>
+            </div>
 
             <div className="flex flex-wrap justify-center transition-all duration-300 gap-6 mx-4">
                 {unplayed.map((game) => {
@@ -113,9 +222,20 @@ export default function Dashboard() {
                             <p className="font-bold text-lg lg:text-2xl text-pink-500 underline">
                                 {game.name}
                             </p>
-                            <p className="px-2 py-1 bg-gray-700 w-fit rounded text-sm mt-3 mb-2">
-                                {game.appid}
-                            </p>
+                            <div className="flex flex-row gap-2">
+                                <p className="px-2 py-1 bg-gray-700 w-fit rounded text-sm mt-3 mb-2">
+                                    {game.appid}
+                                </p>
+                                <p className="px-2 py-1 bg-gray-700 w-fit rounded text-sm mt-3 mb-2">
+                                    {game.playtime_forever} Minutes Played
+                                </p>
+                                <p className="px-2 py-1 bg-gray-700 w-fit rounded text-sm mt-3 mb-2">
+                                    Last Played:{" "}
+                                    {formatUnixTimestamp(
+                                        game.rtime_last_played
+                                    )}
+                                </p>
+                            </div>
                             <img
                                 src={image}
                                 alt="Image not found"

@@ -38,7 +38,7 @@ export default function Profile(props) {
                         className="text-blue-700 ml-2"
                         href={props.data.profileurl}
                     >
-                        {props.data.personaname}
+                        {props.data.personaname} ({props.data.realname})
                     </a>
                 </p>
             </div>
@@ -72,14 +72,6 @@ export default function Profile(props) {
                                 </div>
                             )}
                         </div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <p className="bg-slate-800 py-2 px-3 rounded">
-                            {props.data.accountname}
-                        </p>
-                        <p className="bg-slate-800 py-2 px-3 rounded">
-                            {props.data.realname}
-                        </p>
                     </div>
                     <div className="font-bold">
                         <p className=" flex flex-row justify-between items-center gap-4 text-indigo-500">

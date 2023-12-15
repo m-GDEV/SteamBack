@@ -76,7 +76,10 @@ export default function Login() {
                     <p>1. Go to your Steam profile page and copy the link.</p>
                     <p>
                         2. Go to{" "}
-                        <a href="https://steamdb.info/calculator">
+                        <a
+                            href="https://steamdb.info/calculator"
+                            className="font-bold text-lg text-yellow-500"
+                        >
                             SteamDB's Calculator
                         </a>{" "}
                         and enter the link you copied.

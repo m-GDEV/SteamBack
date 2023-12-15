@@ -6,7 +6,7 @@ import Dashboard from "./components/Dashboard";
 
 export default function App() {
     return (
-        <div className="bg-slate-900 min-h-screen font-mono">
+        <div className="bg-slate-900 min-h-screen font-silkscreen" id="app">
             <Navbar />
             <div className="flex justify-center mt-24">
                 <Routes>
